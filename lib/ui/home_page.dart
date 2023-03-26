@@ -103,7 +103,7 @@ class MutiProductListView extends StatelessWidget {
     return Expanded(
       child: Column(
         children: [
-          ProductTitleView(title: title),
+          ListTitleView(title: title),
           Expanded(
             child: ListView.builder(
                 physics: const BouncingScrollPhysics(),
@@ -139,7 +139,7 @@ class SingleProductListView extends StatelessWidget {
             if (productList[index] is Product) {
               return ItemView(product: productList[index]);
             } else if (productList[index] is String) {
-              return ProductTitleView(title: productList[index]);
+              return ListTitleView(title: productList[index]);
             }
             return null;
           }),
@@ -147,8 +147,8 @@ class SingleProductListView extends StatelessWidget {
   }
 }
 
-class ProductTitleView extends StatelessWidget {
-  const ProductTitleView({super.key, required this.title});
+class ListTitleView extends StatelessWidget {
+  const ListTitleView({super.key, required this.title});
 
   final String title;
 
