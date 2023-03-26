@@ -31,38 +31,35 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
             centerTitle: true,
             elevation: 1),
-        body: Flex(
-          direction: Axis.vertical,
+        body: Column(
           children: [
             BannerView(bannerList: getBannerList()),
-            Expanded(
-                flex: 1,
-                child: LayoutBuilder(builder: (context, constraints) {
-                  if (kDebugMode) {
-                    print("maxWidth=${constraints.maxWidth}");
-                  }
-                  if (constraints.maxWidth > 600) {
-                    return Row(
-                      mainAxisSize: MainAxisSize.max,
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        ProductListView(
-                            productList: getProductListData(
-                                "女裝", 3, "assets/images/women_image.png")),
-                        ProductListView(
-                            productList: getProductListData(
-                                "男裝", 5, "assets/images/men_image.jpeg")),
-                        ProductListView(
-                            productList: getProductListData(
-                                "配件", 10, "assets/images/women_image.png"))
-                      ],
-                    );
-                  } else {
-                    return ProductListView(
-                        productList: getAllProductListData());
-                  }
-                }))
+            Expanded(child: LayoutBuilder(builder: (context, constraints) {
+              if (kDebugMode) {
+                print("maxWidth=${constraints.maxWidth}");
+              }
+              if (constraints.maxWidth > 600) {
+                return Row(
+                  children: [
+                    MutiProductListView(
+                        title: "女裝",
+                        productList: getProductListData(
+                            null, 3, "assets/images/women_image.png")),
+                    MutiProductListView(
+                        title: "男裝",
+                        productList: getProductListData(
+                            null, 5, "assets/images/men_image.jpeg")),
+                    MutiProductListView(
+                        title: "配件",
+                        productList: getProductListData(
+                            null, 10, "assets/images/accessory_image.jpeg"))
+                  ],
+                );
+              } else {
+                return SingleProductListView(
+                    productList: getAllProductListData());
+              }
+            }))
           ],
         ));
   }
@@ -94,14 +91,44 @@ class BannerView extends StatelessWidget {
   }
 }
 
-class ProductListView extends StatelessWidget {
-  const ProductListView({super.key, required this.productList});
+class MutiProductListView extends StatelessWidget {
+  const MutiProductListView(
+      {super.key, required this.title, required this.productList});
+
+  final List<dynamic> productList;
+  final String title;
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: Column(
+        children: [
+          ProductTitleView(title: title),
+          Expanded(
+            child: ListView.builder(
+                physics: const BouncingScrollPhysics(),
+                scrollDirection: Axis.vertical,
+                shrinkWrap: true,
+                padding: const EdgeInsets.symmetric(horizontal: 10),
+                itemCount: productList.length,
+                itemBuilder: (BuildContext context, int index) {
+                  return ItemView(product: productList[index]);
+                }),
+          )
+        ],
+      ),
+    );
+  }
+}
+
+class SingleProductListView extends StatelessWidget {
+  const SingleProductListView({super.key, required this.productList});
 
   final List<dynamic> productList;
 
   @override
   Widget build(BuildContext context) {
-    return Flexible(
+    return Expanded(
       child: ListView.builder(
           physics: const BouncingScrollPhysics(),
           scrollDirection: Axis.vertical,
@@ -127,11 +154,12 @@ class ProductTitleView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Text(title,
-            textAlign: TextAlign.center,
-            style: const TextStyle(fontWeight: FontWeight.bold)));
+    return SizedBox(
+        child: Text(
+      title,
+      textAlign: TextAlign.center,
+      style: const TextStyle(fontWeight: FontWeight.bold),
+    ));
   }
 }
 
@@ -150,8 +178,7 @@ class ItemView extends StatelessWidget {
               color: Colors.black,
               width: 1.0,
             )),
-        child: Flex(
-          direction: Axis.horizontal,
+        child: Row(
           children: [
             Image.asset(
               product.mainImage,
