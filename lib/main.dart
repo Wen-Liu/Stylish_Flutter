@@ -1,37 +1,28 @@
-import 'dart:html';
-
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'Product.dart';
+import 'product.dart';
 
 void main() {
   runApp(const MyApp());
 }
 
-List<Product> getWomenList() {
-  return List<Product>.filled(
-      3,
+List<dynamic> getProductListData(String title, int listSize) {
+  List<dynamic> list = [title];
+  list.addAll(List<Product>.filled(
+      listSize,
       Product(
           title: "UNIQLO 特級極輕羽絨外套",
           mainImage: 'images/item_image.jpeg',
-          price: 323));
+          price: 323)));
+  return list;
 }
 
-List<Product> getMenList() {
-  return List<Product>.filled(
-      5,
-      Product(
-          title: "UNIQLO 特級極輕羽絨外套",
-          mainImage: 'images/item_image.jpeg',
-          price: 323));
-}
-
-List<Product> getAccessoryList() {
-  return List<Product>.filled(
-      8,
-      Product(
-          title: "UNIQLO 特級極輕羽絨外套",
-          mainImage: 'images/item_image.jpeg',
-          price: 323));
+List<dynamic> getAllProductListData() {
+  List<dynamic> list = [];
+  list.addAll(getProductListData("女裝", 3));
+  list.addAll(getProductListData("男裝", 5));
+  list.addAll(getProductListData("配件", 10));
+  return list;
 }
 
 List<String> getBannerList() {
@@ -49,15 +40,13 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      home: const MyHomePage(),
     );
   }
 }
 
 class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
-
-  final String title;
+  const MyHomePage({super.key});
 
   @override
   State<MyHomePage> createState() => _MyHomePageState();
@@ -80,128 +69,143 @@ class _MyHomePageState extends State<MyHomePage> {
           title: Image.asset(
             'images/stylish_app_bar.png',
             fit: BoxFit.contain,
-            height: AppBar().preferredSize.height / 3,
+            height: AppBar().preferredSize.height / 2,
           ),
         ),
         body: Flex(
           direction: Axis.vertical,
-          mainAxisSize: MainAxisSize.max,
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            SizedBox(
-              height: 150,
-              child: CustomListView(bannerList: getBannerList()),
-            ),
+            BannerView(bannerList: getBannerList()),
             Expanded(
-              flex: 1,
-              child: Row(
-                mainAxisSize: MainAxisSize.max,
-                mainAxisAlignment: MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  CustomVerticalListView(
-                      title: "女裝", productList: getWomenList()),
-                  CustomVerticalListView(
-                      title: "男裝", productList: getMenList()),
-                  CustomVerticalListView(
-                      title: "配件", productList: getAccessoryList())
-                ],
-              ),
-            )
+                flex: 1,
+                child: LayoutBuilder(builder: (context, constraints) {
+                  if (kDebugMode) {
+                    print("maxWidth=${constraints.maxWidth}");
+                  }
+                  if (constraints.maxWidth > 600) {
+                    return Row(
+                      mainAxisSize: MainAxisSize.max,
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        ProductListView(
+                            productList: getProductListData("女裝", 3)),
+                        ProductListView(
+                            productList: getProductListData("男裝", 5)),
+                        ProductListView(
+                            productList: getProductListData("配件", 10))
+                      ],
+                    );
+                  } else {
+                    return ProductListView(
+                        productList: getAllProductListData());
+                  }
+                }))
           ],
         ));
   }
 }
 
-class CustomListView extends StatelessWidget {
-  const CustomListView({super.key, required this.bannerList});
+class BannerView extends StatelessWidget {
+  const BannerView({super.key, required this.bannerList});
 
   final List<String> bannerList;
 
   @override
   Widget build(BuildContext context) {
-    return ListView.builder(
-        scrollDirection: Axis.horizontal,
-        shrinkWrap: true,
-        padding: const EdgeInsets.all(10),
-        itemCount: 10,
-        itemBuilder: (BuildContext context, int index) {
-          return Card(
-              clipBehavior: Clip.antiAlias,
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10)),
-              child:
-                  Image.asset(bannerList[index], width: 200, fit: BoxFit.fill));
-        });
-    // ,
-    // );
+    return SizedBox(
+        height: 150,
+        child: ListView.builder(
+            scrollDirection: Axis.horizontal,
+            shrinkWrap: true,
+            padding: const EdgeInsets.all(10),
+            itemCount: 10,
+            itemBuilder: (BuildContext context, int index) {
+              return Card(
+                  clipBehavior: Clip.antiAlias,
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10)),
+                  child: Image.asset(bannerList[index],
+                      width: 200, fit: BoxFit.fill));
+            }));
   }
 }
 
-class CustomVerticalListView extends StatelessWidget {
-  const CustomVerticalListView(
-      {super.key, required this.title, required this.productList});
+class ProductListView extends StatelessWidget {
+  const ProductListView({super.key, required this.productList});
 
-  final String title;
-  final List<Product> productList;
+  final List<dynamic> productList;
 
   @override
   Widget build(BuildContext context) {
     return Flexible(
-      flex: 1,
       child: ListView.builder(
           scrollDirection: Axis.vertical,
           shrinkWrap: true,
           padding: const EdgeInsets.symmetric(horizontal: 10),
-          itemCount: productList.length + 1,
+          itemCount: productList.length,
           itemBuilder: (BuildContext context, int index) {
-            switch (index) {
-              case 0:
-                return Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Text(title,
-                        textAlign: TextAlign.center,
-                        style: const TextStyle(fontWeight: FontWeight.bold)));
-              default:
-                return Item(product: productList[index - 1]);
+            if (productList[index] is Product) {
+              return ItemView(product: productList[index]);
+            } else if (productList[index] is String) {
+              return ProductTitleView(title: productList[index]);
             }
+            return null;
           }),
     );
   }
 }
 
-class Item extends StatelessWidget {
-  const Item({super.key, required this.product});
+class ProductTitleView extends StatelessWidget {
+  const ProductTitleView({super.key, required this.title});
+
+  final String title;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Text(title,
+            textAlign: TextAlign.center,
+            style: const TextStyle(fontWeight: FontWeight.bold)));
+  }
+}
+
+class ItemView extends StatelessWidget {
+  const ItemView({super.key, required this.product});
 
   final Product product;
 
   @override
   Widget build(BuildContext context) {
     return Card(
-      // color: theme.colorScheme.primary,
-      elevation: 5.0,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Image.asset(
-            product.mainImage,
-            width: 80,
-          ),
-          Padding(
-            padding: const EdgeInsets.only(left: 8.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(product.title),
-                Text("NT\$${product.price}")
-              ],
+        clipBehavior: Clip.antiAlias,
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10.0),
+            side: const BorderSide(
+              color: Colors.black,
+              width: 1.0,
+            )),
+        child: Flex(
+          direction: Axis.horizontal,
+          children: [
+            Image.asset(
+              product.mainImage,
+              width: 80,
             ),
-          )
-        ],
-      ),
-    );
+            Expanded(
+                flex: 1,
+                child: Padding(
+                  padding: const EdgeInsets.only(left: 8.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(product.title),
+                      Text("NT\$ ${product.price}")
+                    ],
+                  ),
+                ))
+          ],
+        ));
   }
 }
