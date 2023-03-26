@@ -185,7 +185,6 @@ class ItemView extends StatelessWidget {
               width: 80,
             ),
             Expanded(
-                flex: 1,
                 child: Padding(
                   padding: const EdgeInsets.only(left: 8.0),
                   child: Column(
