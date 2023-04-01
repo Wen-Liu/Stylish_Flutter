@@ -1,7 +1,9 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:stylish/ui/detail_page.dart';
 import '../data_class/product.dart';
 import '../repository.dart';
+import 'stylish_app_bar.dart';
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key});
@@ -11,26 +13,10 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
-
-  void _incrementCounter() {
-    setState(() {
-      _counter++;
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-            backgroundColor: const Color.fromARGB(255, 242, 244, 246),
-            title: Image.asset(
-              'assets/images/stylish_app_bar.png',
-              fit: BoxFit.contain,
-              height: AppBar().preferredSize.height / 2,
-            ),
-            centerTitle: true,
-            elevation: 1),
+        appBar: const StylishAppBar(),
         body: Column(
           children: [
             BannerView(bannerList: getBannerList()),
@@ -42,17 +28,11 @@ class _MyHomePageState extends State<MyHomePage> {
                 return Row(
                   children: [
                     MutiProductListView(
-                        title: "女裝",
-                        productList: getProductListData(
-                            null, 3, "assets/images/women_image.png")),
+                        title: "女裝", productList: getProductListData(null, 3)),
                     MutiProductListView(
-                        title: "男裝",
-                        productList: getProductListData(
-                            null, 5, "assets/images/men_image.jpeg")),
+                        title: "男裝", productList: getProductListData(null, 5)),
                     MutiProductListView(
-                        title: "配件",
-                        productList: getProductListData(
-                            null, 10, "assets/images/accessory_image.jpeg"))
+                        title: "配件", productList: getProductListData(null, 10))
                   ],
                 );
               } else {
@@ -170,7 +150,14 @@ class ItemView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => DetailPage(product: product)),
+        );
+      },
+      child: Card(
         clipBehavior: Clip.antiAlias,
         shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(10.0),
@@ -180,22 +167,22 @@ class ItemView extends StatelessWidget {
             )),
         child: Row(
           children: [
-            Image.asset(
+            Image.network(
               product.mainImage,
+              fit: BoxFit.contain,
               width: 80,
             ),
             Expanded(
                 child: Padding(
-                  padding: const EdgeInsets.only(left: 8.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(product.title),
-                      Text("NT\$ ${product.price}")
-                    ],
-                  ),
-                ))
+              padding: const EdgeInsets.only(left: 8.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [Text(product.title), Text("NT\$ ${product.price}")],
+              ),
+            ))
           ],
-        ));
+        ),
+      ),
+    );
   }
 }
