@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:stylish/ui/detail_page.dart';
+import 'package:stylish/ui/detail_page/detail_page.dart';
 import '../data_class/product.dart';
 import '../repository.dart';
 import 'stylish_app_bar.dart';

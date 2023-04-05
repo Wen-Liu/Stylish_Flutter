@@ -9,9 +9,9 @@ class Product {
   final String place;
   final String note;
   final String story;
-  final List<ProductColors> colors;
+  final List<ProductColor> colors;
   final List<String> sizes;
-  final List<Variant>? variants;
+  final List<Variant> variants;
   final String mainImage;
   final List<String> images;
 
@@ -36,7 +36,7 @@ class Product {
   factory Product.fromJson(Map<String, dynamic> json) {
     List<String> imagesList = [];
     List<Variant> variantsList = [];
-    List<ProductColors> colorsList = [];
+    List<ProductColor> colorsList = [];
     List<String> sizesList = [];
 
     for (String image in json['images']) {
@@ -48,7 +48,7 @@ class Product {
     }
 
     for (dynamic color in json['colors']) {
-      colorsList.add(ProductColors.fromJson(color));
+      colorsList.add(ProductColor.fromJson(color));
     }
 
     for (String size in json['sizes']) {
@@ -74,14 +74,14 @@ class Product {
   }
 }
 
-class ProductColors {
+class ProductColor {
   final String code;
   final String name;
 
-  ProductColors({required this.code, required this.name});
+  ProductColor({required this.code, required this.name});
 
-  factory ProductColors.fromJson(Map<String, dynamic> json) {
-    return ProductColors(
+  factory ProductColor.fromJson(Map<String, dynamic> json) {
+    return ProductColor(
       code: json['code'],
       name: json['name'],
     );
