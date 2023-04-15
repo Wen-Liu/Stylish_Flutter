@@ -1,3 +1,26 @@
+class ProductResponse {
+  final List<Product> data;
+  int? nextPage;
+
+  ProductResponse({
+    required this.data,
+    this.nextPage,
+  });
+
+  factory ProductResponse.fromJson(Map<String, dynamic> json) {
+    List<Product> productList = [];
+
+    for (dynamic product in json['data']) {
+      productList.add(Product.fromJson(product));
+    }
+
+    return ProductResponse(
+      data: productList,
+      nextPage: json['next_paging'],
+    );
+  }
+}
+
 class Product {
   final int id;
   final String category;

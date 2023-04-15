@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:stylish/ui/home_page.dart';
+import 'package:stylish/ui/home_page/home_page.dart';
 
 void main() {
   runApp(const MyApp());

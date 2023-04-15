@@ -1,9 +1,13 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:stylish/extensions.dart';
 import 'package:stylish/ui/detail_page/detail_page.dart';
-import '../data_class/product.dart';
-import '../repository.dart';
-import 'stylish_app_bar.dart';
+import 'package:stylish/ui/home_page/get_product_list_cubit.dart';
+import '../../data_class/product.dart';
+import '../../network/ProductRepository.dart';
+import '../stylish_app_bar.dart';
+import 'get_product_list_cubit.dart';
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key});
@@ -13,6 +17,8 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  ProductRepository repo = ProductRepository();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -20,26 +26,51 @@ class _MyHomePageState extends State<MyHomePage> {
         body: Column(
           children: [
             BannerView(bannerList: getBannerList()),
-            Expanded(child: LayoutBuilder(builder: (context, constraints) {
-              if (kDebugMode) {
-                print("maxWidth=${constraints.maxWidth}");
-              }
-              if (constraints.maxWidth > 600) {
-                return Row(
-                  children: [
-                    MutiProductListView(
-                        title: "女裝", productList: getProductListData(null, 3)),
-                    MutiProductListView(
-                        title: "男裝", productList: getProductListData(null, 5)),
-                    MutiProductListView(
-                        title: "配件", productList: getProductListData(null, 10))
-                  ],
-                );
-              } else {
-                return SingleProductListView(
-                    productList: getAllProductListData());
-              }
-            }))
+            BlocProvider(
+              create: (context) => GetProductListCubit(repo),
+              child: LayoutBuilder(builder: (context, constraints) {
+                if (constraints.maxWidth > 600) {
+                  return BlocBuilder<GetProductListCubit, GetProductListState>(
+                    builder: (context, state) {
+                      if (state is GetProductLoading) {
+                        return const Center(child: Text("Loading"));
+                      } else if (state is GetProductSuccess) {
+                        return Row(
+                          children: [
+                            MutiProductListView(
+                                title: "女裝",
+                                productList: state.productList
+                                    .where((element) =>
+                                        element.category == "women")
+                                    .toList()),
+                            MutiProductListView(
+                                title: "男裝",
+                                productList: state.productList
+                                    .where(
+                                        (element) => element.category == "men")
+                                    .toList()),
+                            MutiProductListView(
+                                title: "配件",
+                                productList: state.productList
+                                    .where((element) =>
+                                        element.category == "accessories")
+                                    .toList())
+                          ],
+                        );
+                      } else if (state is GetProductError) {
+                        return Center(
+                            child: Text(state.errorCode).addAllPadding(20));
+                      } else {
+                        return const Center(child: Text("Error"));
+                      }
+                    },
+                  );
+                } else {
+                  return SingleProductListView(
+                      productList: getAllProductListData());
+                }
+              }),
+            ).wrapByExpanded()
           ],
         ));
   }

@@ -1,18 +1,45 @@
-import 'data_class/product.dart';
+import 'dart:convert';
 
-List<dynamic> getProductListData(String? title, int listSize) {
-  final data = Product.fromJson(getJsonMap());
-  return [
-    if (title != null) title,
-    ...List.generate(listSize, (_) => data)
-  ];
+import 'package:stylish/network/api_service.dart';
+
+import '../data_class/product.dart';
+
+class ProductRepository {
+  ProductRepository({
+    ApiService? apiService,
+  }) : _apiService = apiService ?? ApiService();
+
+  final ApiService _apiService;
+
+  Future<List<Product>> getProductList() async {
+    List<Product> list = [];
+    int? page = 0;
+
+    while (page != null) {
+      final response = await _apiService.getProductAll(page.toString());
+      if (response.statusCode == 200) {
+        final responseData = ProductResponse.fromJson(response.data);
+        list.addAll(responseData.data);
+        page = responseData.nextPage;
+      } else {
+        throw Exception(response.statusCode);
+      }
+    }
+
+    return list;
+  }
 }
+
+// List<dynamic> getProductListData(String? title, int listSize) {
+//   final data = Product.fromJson(getJsonMap());
+//   return [if (title != null) title, ...List.generate(listSize, (_) => data)];
+// }
 
 List<dynamic> getAllProductListData() {
   List<dynamic> list = [];
-  list.addAll(getProductListData("女裝", 3));
-  list.addAll(getProductListData("男裝", 5));
-  list.addAll(getProductListData("配件", 10));
+  // list.addAll(getProductListData("女裝"));
+  // list.addAll(getProductListData("男裝", 5));
+  // list.addAll(getProductListData("配件", 10));
   return list;
 }
 
