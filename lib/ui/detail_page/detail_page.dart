@@ -70,7 +70,7 @@ class AppPageView extends StatelessWidget {
         SelectView(product: product).addPadding(top: 10),
         StoryView(product: product)
       ],
-    ).atCenter().wrapByContainer(width: 360);
+    ).wrapByContainer(width: 360).atCenter();
   }
 }
 
