@@ -1,5 +1,4 @@
 import 'package:dio/dio.dart';
-import 'package:stylish/network/base_api_services.dart';
 
 class ApiService {
   static const _baseEndpoint = "https://api.appworks-school.tw/api/1.0";
@@ -24,9 +23,17 @@ class ApiService {
     ));
   }
 
-  Future<Response> getProductAll(String page) async {
+  Future<Response> getAllProduct(String page) async {
     return await callGetApiResponse(
         endpoint: _productAll, parameters: {"paging": page});
+  }
+
+  Future<Response> getHotData() async {
+    return await callGetApiResponse(endpoint: _marketingHots);
+  }
+
+  Future<Response> getCampaignData() async {
+    return await callGetApiResponse(endpoint: _marketingCampaigns);
   }
 
   Future<Response> callGetApiResponse(

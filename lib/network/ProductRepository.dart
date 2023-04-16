@@ -1,8 +1,9 @@
 import 'dart:convert';
 
+import 'package:stylish/data_class/get_campaign_response.dart';
 import 'package:stylish/network/api_service.dart';
 
-import '../data_class/product.dart';
+import '../data_class/get_product_response.dart';
 
 class ProductRepository {
   ProductRepository({
@@ -11,12 +12,12 @@ class ProductRepository {
 
   final ApiService _apiService;
 
-  Future<List<Product>> getProductList() async {
+  Future<List<Product>> getProductData() async {
     List<Product> list = [];
     int? page = 0;
 
     while (page != null) {
-      final response = await _apiService.getProductAll(page.toString());
+      final response = await _apiService.getAllProduct(page.toString());
       if (response.statusCode == 200) {
         final responseData = ProductResponse.fromJson(response.data);
         list.addAll(responseData.data);
@@ -28,23 +29,45 @@ class ProductRepository {
 
     return list;
   }
+
+  Future<List<Product>> getHotData() async {
+    final response = await _apiService.getHotData();
+    print("getHotData= $response");
+    if (response.statusCode == 200) {
+      final responseData = ProductResponse.fromJson(response.data);
+      return responseData.data;
+    } else {
+      throw Exception(response.statusCode);
+    }
+  }
+
+  Future<List<Campaign>> getCampaignData() async {
+    final response = await _apiService.getCampaignData();
+    print("getCampaignData= $response");
+    if (response.statusCode == 200) {
+      final responseData = CampaignResponse.fromJson(response.data);
+      return responseData.campaignList;
+    } else {
+      throw Exception(response.statusCode);
+    }
+  }
 }
 
-// List<dynamic> getProductListData(String? title, int listSize) {
-//   final data = Product.fromJson(getJsonMap());
-//   return [if (title != null) title, ...List.generate(listSize, (_) => data)];
-// }
-
-List<dynamic> getAllProductListData() {
+List<dynamic> parseProductData(List<Product> data, {String type = "all"}) {
   List<dynamic> list = [];
-  // list.addAll(getProductListData("女裝"));
-  // list.addAll(getProductListData("男裝", 5));
-  // list.addAll(getProductListData("配件", 10));
-  return list;
-}
 
-List<String> getBannerList() {
-  return List<String>.filled(10, "assets/images/banner_photo.jpeg");
+  if (type == "all") {
+    list.add("女裝");
+    list.addAll(data.where((element) => element.category == "women"));
+    list.add("男裝");
+    list.addAll(data.where((element) => element.category == "men"));
+    list.add("配件");
+    list.addAll(data.where((element) => element.category == "accessories"));
+  } else {
+    list.addAll(data.where((element) => element.category == type));
+  }
+
+  return list;
 }
 
 Map<String, dynamic> getJsonMap() {

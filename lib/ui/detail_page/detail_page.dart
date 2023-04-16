@@ -1,7 +1,7 @@
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:stylish/data_class/product.dart';
+import 'package:stylish/data_class/get_product_response.dart';
 import 'package:stylish/extensions.dart';
 import 'package:stylish/ui/detail_page/detail_view_model.dart';
 import 'package:stylish/ui/stylish_app_bar.dart';
@@ -49,7 +49,8 @@ class WebPageView extends StatelessWidget {
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Image.network(viewModel.product.mainImage).wrapByExpanded(),
+            CachedNetworkImage(imageUrl: viewModel.product.mainImage)
+                .wrapByExpanded(),
             SelectView(viewModel: viewModel)
                 .addPadding(left: 16)
                 .wrapByExpanded()
@@ -72,7 +73,7 @@ class AppPageView extends StatelessWidget {
     return Center(
         child: Column(
       children: [
-        Image.network(viewModel.product.mainImage),
+        CachedNetworkImage(imageUrl: viewModel.product.mainImage),
         SelectView(viewModel: viewModel).addPadding(top: 10),
         StoryView(viewModel: viewModel)
       ],
@@ -125,25 +126,25 @@ class _StockStateViewState extends State<StockStateView> {
   @override
   Widget build(BuildContext context) {
     // return Consumer<DetailViewModel>(builder: (context, dataModel, child) {
-      return Column(
-        children: [
-          ColorView(viewModel: widget.viewModel).addPadding(top: 10),
-          SizeView(viewModel: widget.viewModel).addPadding(top: 15),
-          StockView(viewModel: widget.viewModel).addPadding(top: 15),
-          Row(
-            children: [
-              TextButton(
-                style: TextButton.styleFrom(
-                    backgroundColor: Colors.black87,
-                    foregroundColor: Colors.white,
-                    textStyle: const TextStyle(fontSize: 20)),
-                onPressed: () {},
-                child: const Text('請選擇尺寸').addVerticalPadding(12),
-              ).wrapByExpanded()
-            ],
-          ).addPadding(top: 10),
-        ],
-      );
+    return Column(
+      children: [
+        ColorView(viewModel: widget.viewModel).addPadding(top: 10),
+        SizeView(viewModel: widget.viewModel).addPadding(top: 15),
+        StockView(viewModel: widget.viewModel).addPadding(top: 15),
+        Row(
+          children: [
+            TextButton(
+              style: TextButton.styleFrom(
+                  backgroundColor: Colors.black87,
+                  foregroundColor: Colors.white,
+                  textStyle: const TextStyle(fontSize: 20)),
+              onPressed: () {},
+              child: const Text('請選擇尺寸').addVerticalPadding(12),
+            ).wrapByExpanded()
+          ],
+        ).addPadding(top: 10),
+      ],
+    );
     // });
   }
 }
@@ -320,7 +321,7 @@ class StoryView extends StatelessWidget {
         ).addPadding(top: 20, bottom: 5),
         Text(viewModel.product.story),
         for (String image in viewModel.product.images)
-          Image.network(image).addPadding(top: 16)
+          CachedNetworkImage(imageUrl: image).addPadding(top: 16)
       ],
     );
   }

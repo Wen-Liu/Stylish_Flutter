@@ -1,13 +1,14 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:stylish/data_class/get_campaign_response.dart';
 import 'package:stylish/extensions.dart';
 import 'package:stylish/ui/detail_page/detail_page.dart';
+import 'package:stylish/ui/home_page/get_campaign_cubit.dart';
 import 'package:stylish/ui/home_page/get_product_list_cubit.dart';
-import '../../data_class/product.dart';
+import '../../data_class/get_product_response.dart';
 import '../../network/ProductRepository.dart';
 import '../stylish_app_bar.dart';
-import 'get_product_list_cubit.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key});
@@ -25,49 +26,40 @@ class _MyHomePageState extends State<MyHomePage> {
         appBar: const StylishAppBar(),
         body: Column(
           children: [
-            BannerView(bannerList: getBannerList()),
+            BlocProvider(
+              create: (context) => GetCampaignCubit(repo),
+              child: BlocBuilder<GetCampaignCubit, ApiState>(
+                builder: (context, state) {
+                  if (state is Loading) {
+                    return const Center(child: Text("Loading"));
+                  } else if (state is ApiSuccess) {
+                    return BannerView(bannerList: state.data);
+                  } else if (state is ApiError) {
+                    return Center(
+                        child: Text(state.errorCode).addAllPadding(20));
+                  } else {
+                    return const Center(child: Text("default"));
+                  }
+                },
+              ),
+            ),
             BlocProvider(
               create: (context) => GetProductListCubit(repo),
-              child: LayoutBuilder(builder: (context, constraints) {
-                if (constraints.maxWidth > 600) {
-                  return BlocBuilder<GetProductListCubit, GetProductListState>(
-                    builder: (context, state) {
-                      if (state is GetProductLoading) {
-                        return const Center(child: Text("Loading"));
-                      } else if (state is GetProductSuccess) {
-                        return Row(
-                          children: [
-                            MutiProductListView(
-                                title: "女裝",
-                                productList: state.productList
-                                    .where((element) =>
-                                        element.category == "women")
-                                    .toList()),
-                            MutiProductListView(
-                                title: "男裝",
-                                productList: state.productList
-                                    .where(
-                                        (element) => element.category == "men")
-                                    .toList()),
-                            MutiProductListView(
-                                title: "配件",
-                                productList: state.productList
-                                    .where((element) =>
-                                        element.category == "accessories")
-                                    .toList())
-                          ],
-                        );
-                      } else if (state is GetProductError) {
-                        return Center(
-                            child: Text(state.errorCode).addAllPadding(20));
-                      } else {
-                        return const Center(child: Text("Error"));
-                      }
-                    },
-                  );
+              child: BlocBuilder<GetProductListCubit, ApiState>(
+                  builder: (context, state) {
+                if (state is Loading) {
+                  return const Center(child: Text("Loading"));
+                } else if (state is ApiSuccess) {
+                  return LayoutBuilder(builder: (context, constraints) {
+                    return (constraints.maxWidth > 600)
+                        ? WebProductView(state: state)
+                        : AppProductListView(
+                            productList: parseProductData(state.data));
+                  });
+                } else if (state is ApiError) {
+                  return Center(child: Text(state.errorCode).addAllPadding(20));
                 } else {
-                  return SingleProductListView(
-                      productList: getAllProductListData());
+                  return const Center(child: Text("default"));
                 }
               }),
             ).wrapByExpanded()
@@ -76,10 +68,31 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 }
 
+class WebProductView extends StatelessWidget {
+  final ApiSuccess state;
+
+  const WebProductView({super.key, required this.state});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        MutiProductListView(
+            title: "女裝", list: parseProductData(state.data, type: "women")),
+        MutiProductListView(
+            title: "男裝", list: parseProductData(state.data, type: "men")),
+        MutiProductListView(
+            title: "配件",
+            list: parseProductData(state.data, type: "accessories")),
+      ],
+    );
+  }
+}
+
 class BannerView extends StatelessWidget {
   const BannerView({super.key, required this.bannerList});
 
-  final List<String> bannerList;
+  final List<Campaign> bannerList;
 
   @override
   Widget build(BuildContext context) {
@@ -90,23 +103,29 @@ class BannerView extends StatelessWidget {
             scrollDirection: Axis.horizontal,
             shrinkWrap: true,
             padding: const EdgeInsets.all(10),
-            itemCount: 10,
+            itemCount: bannerList.length,
             itemBuilder: (BuildContext context, int index) {
               return Card(
                   clipBehavior: Clip.antiAlias,
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10)),
-                  child: Image.asset(bannerList[index],
-                      width: 200, fit: BoxFit.fill));
+                  child: CachedNetworkImage(
+                    imageUrl: bannerList[index].picture,
+                    fit: BoxFit.fitHeight,
+                    placeholder: (context, url) =>
+                        const CircularProgressIndicator().addAllPadding(20),
+                    errorWidget: (context, url, error) =>
+                        const Icon(Icons.error),
+                  ));
             }));
   }
 }
 
 class MutiProductListView extends StatelessWidget {
   const MutiProductListView(
-      {super.key, required this.title, required this.productList});
+      {super.key, required this.title, required this.list});
 
-  final List<dynamic> productList;
+  final List<dynamic> list;
   final String title;
 
   @override
@@ -121,9 +140,9 @@ class MutiProductListView extends StatelessWidget {
                 scrollDirection: Axis.vertical,
                 shrinkWrap: true,
                 padding: const EdgeInsets.symmetric(horizontal: 10),
-                itemCount: productList.length,
+                itemCount: list.length,
                 itemBuilder: (BuildContext context, int index) {
-                  return ItemView(product: productList[index]);
+                  return ItemView(product: list[index]);
                 }),
           )
         ],
@@ -132,8 +151,8 @@ class MutiProductListView extends StatelessWidget {
   }
 }
 
-class SingleProductListView extends StatelessWidget {
-  const SingleProductListView({super.key, required this.productList});
+class AppProductListView extends StatelessWidget {
+  const AppProductListView({super.key, required this.productList});
 
   final List<dynamic> productList;
 
@@ -198,10 +217,13 @@ class ItemView extends StatelessWidget {
             )),
         child: Row(
           children: [
-            Image.network(
-              product.mainImage,
-              fit: BoxFit.contain,
+            CachedNetworkImage(
               width: 80,
+              fit: BoxFit.contain,
+              imageUrl: product.mainImage,
+              placeholder: (context, url) =>
+                  const CircularProgressIndicator().addAllPadding(20),
+              errorWidget: (context, url, error) => const Icon(Icons.error),
             ),
             Expanded(
                 child: Padding(

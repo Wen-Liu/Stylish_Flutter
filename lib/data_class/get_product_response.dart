@@ -10,8 +10,8 @@ class ProductResponse {
   factory ProductResponse.fromJson(Map<String, dynamic> json) {
     List<Product> productList = [];
 
-    for (dynamic product in json['data']) {
-      productList.add(Product.fromJson(product));
+    for (dynamic data in json['data']) {
+      productList.add(Product.fromJson(data));
     }
 
     return ProductResponse(

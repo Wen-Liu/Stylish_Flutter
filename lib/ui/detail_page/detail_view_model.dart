@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:stylish/extensions.dart';
-import '../../data_class/product.dart';
+import '../../data_class/get_product_response.dart';
 
 class DetailViewModel extends ChangeNotifier {
   late Product _product;

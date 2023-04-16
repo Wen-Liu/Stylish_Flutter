@@ -1,29 +1,29 @@
 import 'package:bloc/bloc.dart';
 import 'package:meta/meta.dart';
-import '../../data_class/product.dart';
+import '../../data_class/get_product_response.dart';
 import '../../network/ProductRepository.dart';
 
-part 'get_product_list_state.dart';
+part '../../network/api_state.dart';
 
-class GetProductListCubit extends Cubit<GetProductListState> {
+class GetProductListCubit extends Cubit<ApiState> {
   final ProductRepository productRepository;
 
-  GetProductListCubit(this.productRepository) : super(GetProductLoading()) {
+  GetProductListCubit(this.productRepository) : super(Loading()) {
     getProductList();
   }
 
   Future<void> getProductList() async {
     try {
-      emit(GetProductLoading());
-      final productList = await productRepository.getProductList();
-      emit(GetProductSuccess(productList));
+      emit(Loading());
+      final productList = await productRepository.getProductData();
+      emit(ApiSuccess<List<Product>>(productList));
     } catch (e) {
-      emit(GetProductError(e.toString()));
+      emit(ApiError(e.toString()));
     }
   }
 
   void success(List<Product> productList) =>
-      emit(GetProductSuccess(productList));
+      emit(ApiSuccess(productList));
 
-  void error(String error) => emit(GetProductError(error));
+  void error(String error) => emit(ApiError(error));
 }
