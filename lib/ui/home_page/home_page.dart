@@ -28,19 +28,21 @@ class _MyHomePageState extends State<MyHomePage> {
           children: [
             BlocProvider(
               create: (context) => GetCampaignCubit(repo),
-              child: BlocBuilder<GetCampaignCubit, ApiState>(
-                builder: (context, state) {
-                  if (state is Loading) {
-                    return const Center(child: Text("Loading"));
-                  } else if (state is ApiSuccess) {
-                    return BannerView(bannerList: state.data);
-                  } else if (state is ApiError) {
-                    return Center(
-                        child: Text(state.errorCode).addAllPadding(20));
-                  } else {
-                    return const Center(child: Text("default"));
-                  }
-                },
+              child: SizedBox(
+                height: 150,
+                child: BlocBuilder<GetCampaignCubit, ApiState>(
+                  builder: (context, state) {
+                    if (state is Loading) {
+                      return const Text("Loading").atCenter();
+                    } else if (state is ApiSuccess) {
+                      return BannerView(bannerList: state.data);
+                    } else if (state is ApiError) {
+                      return Text(state.errorCode).addAllPadding(20).atCenter();
+                    } else {
+                      return const Text("default").atCenter();
+                    }
+                  },
+                ),
               ),
             ),
             BlocProvider(
@@ -48,7 +50,7 @@ class _MyHomePageState extends State<MyHomePage> {
               child: BlocBuilder<GetProductListCubit, ApiState>(
                   builder: (context, state) {
                 if (state is Loading) {
-                  return const Center(child: Text("Loading"));
+                  return const Text("Loading").atCenter();
                 } else if (state is ApiSuccess) {
                   return LayoutBuilder(builder: (context, constraints) {
                     return (constraints.maxWidth > 600)
@@ -57,12 +59,12 @@ class _MyHomePageState extends State<MyHomePage> {
                             productList: parseProductData(state.data));
                   });
                 } else if (state is ApiError) {
-                  return Center(child: Text(state.errorCode).addAllPadding(20));
+                  return Text(state.errorCode).addAllPadding(20).atCenter();
                 } else {
-                  return const Center(child: Text("default"));
+                  return const Text("default").atCenter();
                 }
               }),
-            ).wrapByExpanded()
+            ).expanded()
           ],
         ));
   }
@@ -96,28 +98,25 @@ class BannerView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-        height: 150,
-        child: ListView.builder(
-            physics: const BouncingScrollPhysics(),
-            scrollDirection: Axis.horizontal,
-            shrinkWrap: true,
-            padding: const EdgeInsets.all(10),
-            itemCount: bannerList.length,
-            itemBuilder: (BuildContext context, int index) {
-              return Card(
-                  clipBehavior: Clip.antiAlias,
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10)),
-                  child: CachedNetworkImage(
-                    imageUrl: bannerList[index].picture,
-                    fit: BoxFit.fitHeight,
-                    placeholder: (context, url) =>
-                        const CircularProgressIndicator().addAllPadding(20),
-                    errorWidget: (context, url, error) =>
-                        const Icon(Icons.error),
-                  ));
-            }));
+    return ListView.builder(
+        physics: const BouncingScrollPhysics(),
+        scrollDirection: Axis.horizontal,
+        shrinkWrap: true,
+        padding: const EdgeInsets.all(10),
+        itemCount: bannerList.length,
+        itemBuilder: (BuildContext context, int index) {
+          return Card(
+              clipBehavior: Clip.antiAlias,
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10)),
+              child: CachedNetworkImage(
+                imageUrl: bannerList[index].picture,
+                fit: BoxFit.fitHeight,
+                placeholder: (context, url) =>
+                    const CircularProgressIndicator().addAllPadding(20),
+                errorWidget: (context, url, error) => const Icon(Icons.error),
+              ));
+        });
   }
 }
 
@@ -130,24 +129,20 @@ class MutiProductListView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Expanded(
-      child: Column(
-        children: [
-          ListTitleView(title: title),
-          Expanded(
-            child: ListView.builder(
-                physics: const BouncingScrollPhysics(),
-                scrollDirection: Axis.vertical,
-                shrinkWrap: true,
-                padding: const EdgeInsets.symmetric(horizontal: 10),
-                itemCount: list.length,
-                itemBuilder: (BuildContext context, int index) {
-                  return ItemView(product: list[index]);
-                }),
-          )
-        ],
-      ),
-    );
+    return Column(
+      children: [
+        ListTitleView(title: title),
+        ListView.builder(
+            physics: const BouncingScrollPhysics(),
+            scrollDirection: Axis.vertical,
+            shrinkWrap: true,
+            padding: const EdgeInsets.symmetric(horizontal: 10),
+            itemCount: list.length,
+            itemBuilder: (BuildContext context, int index) {
+              return ItemView(product: list[index]);
+            }).expanded()
+      ],
+    ).expanded();
   }
 }
 
@@ -158,22 +153,20 @@ class AppProductListView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Expanded(
-      child: ListView.builder(
-          physics: const BouncingScrollPhysics(),
-          scrollDirection: Axis.vertical,
-          shrinkWrap: true,
-          padding: const EdgeInsets.symmetric(horizontal: 10),
-          itemCount: productList.length,
-          itemBuilder: (BuildContext context, int index) {
-            if (productList[index] is Product) {
-              return ItemView(product: productList[index]);
-            } else if (productList[index] is String) {
-              return ListTitleView(title: productList[index]);
-            }
-            return null;
-          }),
-    );
+    return ListView.builder(
+        physics: const BouncingScrollPhysics(),
+        scrollDirection: Axis.vertical,
+        shrinkWrap: true,
+        padding: const EdgeInsets.symmetric(horizontal: 10),
+        itemCount: productList.length,
+        itemBuilder: (BuildContext context, int index) {
+          if (productList[index] is Product) {
+            return ItemView(product: productList[index]);
+          } else if (productList[index] is String) {
+            return ListTitleView(title: productList[index]);
+          }
+          return null;
+        }).expanded();
   }
 }
 
@@ -184,12 +177,11 @@ class ListTitleView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-        child: Text(
+    return Text(
       title,
       textAlign: TextAlign.center,
       style: const TextStyle(fontWeight: FontWeight.bold),
-    ));
+    ).addPadding(top: 10, bottom: 5);
   }
 }
 
@@ -225,14 +217,10 @@ class ItemView extends StatelessWidget {
                   const CircularProgressIndicator().addAllPadding(20),
               errorWidget: (context, url, error) => const Icon(Icons.error),
             ),
-            Expanded(
-                child: Padding(
-              padding: const EdgeInsets.only(left: 8.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [Text(product.title), Text("NT\$ ${product.price}")],
-              ),
-            ))
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [Text(product.title), Text("NT\$ ${product.price}")],
+            ).addPadding(left: 8).expanded()
           ],
         ),
       ),

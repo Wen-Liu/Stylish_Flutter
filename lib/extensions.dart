@@ -38,8 +38,12 @@ extension WidgetExtension on Widget {
     );
   }
 
-  Widget wrapByExpanded({int? flex}) {
+  Widget expanded({int? flex}) {
     return Expanded(flex: flex ?? 1, child: this);
+  }
+
+  Widget atCenter() {
+    return Center(child: this);
   }
 }
 

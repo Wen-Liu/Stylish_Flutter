@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:stylish/data_class/get_campaign_response.dart';
 import 'package:stylish/network/api_service.dart';
 
@@ -43,7 +41,7 @@ class ProductRepository {
 
   Future<List<Campaign>> getCampaignData() async {
     final response = await _apiService.getCampaignData();
-    print("getCampaignData= $response");
+    // print("getCampaignData= $response");
     if (response.statusCode == 200) {
       final responseData = CampaignResponse.fromJson(response.data);
       return responseData.campaignList;

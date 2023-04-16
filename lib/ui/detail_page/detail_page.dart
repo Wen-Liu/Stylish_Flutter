@@ -1,277 +1,282 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:provider/provider.dart';
 import 'package:stylish/data_class/get_product_response.dart';
 import 'package:stylish/extensions.dart';
 import 'package:stylish/ui/detail_page/detail_view_model.dart';
+import 'package:stylish/ui/detail_page/stock_cubit.dart';
 import 'package:stylish/ui/stylish_app_bar.dart';
 
 class DetailPage extends StatelessWidget {
   DetailPage({super.key, required this.product});
 
   final Product product;
-  final DetailViewModel viewModel = DetailViewModel();
+
+  // final Product product = DetailViewModel();
 
   static const double webViewWidth = 760;
   static const double appViewWidth = 360;
 
   @override
   Widget build(BuildContext context) {
-    viewModel.setProduct(product);
-
-    return ChangeNotifierProvider(
-        create: (context) => viewModel,
-        child: Scaffold(
-            appBar: const StylishAppBar(),
-            body: SingleChildScrollView(
-              child: LayoutBuilder(builder: (context, constraints) {
-                return ((constraints.maxWidth > 780)
-                        ? WebPageView(viewModel: viewModel, width: webViewWidth)
-                        : AppPageView(
-                            viewModel: viewModel, width: appViewWidth))
-                    .addVerticalPadding(10);
-              }),
-            )));
+    return Scaffold(
+        appBar: const StylishAppBar(),
+        body: SingleChildScrollView(
+          child: LayoutBuilder(builder: (context, constraints) {
+            return ((constraints.maxWidth > 780)
+                    ? WebPageView(product: product, width: webViewWidth)
+                    : AppPageView(product: product, width: appViewWidth))
+                .addVerticalPadding(10);
+          }),
+        ));
   }
 }
 
 class WebPageView extends StatelessWidget {
-  const WebPageView({super.key, required this.viewModel, required this.width});
+  const WebPageView({super.key, required this.product, required this.width});
 
-  final DetailViewModel viewModel;
+  final Product product;
   final double width;
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-        child: Column(
+    return Column(
       children: [
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            CachedNetworkImage(imageUrl: viewModel.product.mainImage)
-                .wrapByExpanded(),
-            SelectView(viewModel: viewModel)
-                .addPadding(left: 16)
-                .wrapByExpanded()
+            CachedNetworkImage(imageUrl: product.mainImage).expanded(),
+            SelectView(product: product).addPadding(left: 16).expanded()
           ],
         ),
-        StoryView(viewModel: viewModel)
+        StoryView(product: product)
       ],
-    ).wrapByContainer(width: 760));
+    ).atCenter().wrapByContainer(width: 760);
   }
 }
 
 class AppPageView extends StatelessWidget {
-  const AppPageView({super.key, required this.viewModel, required this.width});
+  const AppPageView({super.key, required this.product, required this.width});
 
-  final DetailViewModel viewModel;
+  final Product product;
   final double width;
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-        child: Column(
+    return Column(
       children: [
-        CachedNetworkImage(imageUrl: viewModel.product.mainImage),
-        SelectView(viewModel: viewModel).addPadding(top: 10),
-        StoryView(viewModel: viewModel)
+        CachedNetworkImage(imageUrl: product.mainImage),
+        SelectView(product: product).addPadding(top: 10),
+        StoryView(product: product)
       ],
-    ).wrapByContainer(width: 360));
+    ).atCenter().wrapByContainer(width: 360);
   }
 }
 
 class SelectView extends StatelessWidget {
-  final DetailViewModel viewModel;
+  final Product product;
 
-  const SelectView({super.key, required this.viewModel});
+  const SelectView({super.key, required this.product});
 
   @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(viewModel.product.title,
+        Text(product.title,
                 style:
                     const TextStyle(fontSize: 20, fontWeight: FontWeight.bold))
             .addPadding(top: 5),
-        CustomText(text: viewModel.product.id.toString(), fontSize: 14)
+        CustomText(text: product.id.toString(), fontSize: 14)
             .addPadding(top: 3),
         Text(
-          "NT\$ ${viewModel.product.price}",
+          "NT\$ ${product.price}",
           style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
         ).addPadding(top: 12),
         const Divider(color: Colors.grey, thickness: 1).addPadding(top: 2),
-        StockStateView(viewModel: viewModel),
-        CustomText(text: viewModel.product.note).addPadding(top: 10),
-        CustomText(text: viewModel.product.texture),
-        CustomText(text: viewModel.product.description),
-        CustomText(text: "素材產地 / ${viewModel.product.place}"),
-        CustomText(text: "加工產地 / ${viewModel.product.place}"),
+        StockStateView(product: product),
+        CustomText(text: product.note).addPadding(top: 10),
+        CustomText(text: product.texture),
+        CustomText(text: product.description),
+        CustomText(text: "素材產地 / ${product.place}"),
+        CustomText(text: "加工產地 / ${product.place}"),
       ],
     );
   }
 }
 
-class StockStateView extends StatefulWidget {
-  const StockStateView({super.key, required this.viewModel});
+class StockStateView extends StatelessWidget {
+  const StockStateView({super.key, required this.product});
 
-  final DetailViewModel viewModel;
+  final Product product;
 
-  @override
-  State<StockStateView> createState() => _StockStateViewState();
-}
-
-class _StockStateViewState extends State<StockStateView> {
   @override
   Widget build(BuildContext context) {
-    // return Consumer<DetailViewModel>(builder: (context, dataModel, child) {
-    return Column(
-      children: [
-        ColorView(viewModel: widget.viewModel).addPadding(top: 10),
-        SizeView(viewModel: widget.viewModel).addPadding(top: 15),
-        StockView(viewModel: widget.viewModel).addPadding(top: 15),
-        Row(
-          children: [
-            TextButton(
-              style: TextButton.styleFrom(
-                  backgroundColor: Colors.black87,
-                  foregroundColor: Colors.white,
-                  textStyle: const TextStyle(fontSize: 20)),
-              onPressed: () {},
-              child: const Text('請選擇尺寸').addVerticalPadding(12),
-            ).wrapByExpanded()
-          ],
-        ).addPadding(top: 10),
-      ],
+    return BlocProvider(
+      create: (context) => StockCubit(product),
+      child: BlocBuilder<StockCubit, StockData>(
+        builder: (context, state) {
+          return Column(
+            children: [
+              ColorView(context: context, data: state).addPadding(top: 10),
+              SizeView(context: context, data: state).addPadding(top: 15),
+              StockView(context: context, data: state).addPadding(top: 15),
+              ConfirmBtnView(context: context, data: state).addPadding(top: 10),
+            ],
+          );
+        },
+      ),
     );
     // });
   }
 }
 
 class ColorView extends StatelessWidget {
-  const ColorView({super.key, required this.viewModel});
+  const ColorView({super.key, required this.context, required this.data});
 
-  final DetailViewModel viewModel;
+  final BuildContext context;
+  final StockData data;
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder(
-      valueListenable: viewModel.currentColor,
-      builder: (BuildContext context, value, Widget? child) {
-        return Row(
-          children: [
-            const CustomText(text: "顏色"),
-            const VerticalLineView().addHorizontalPadding(10),
-            for (ProductColor color in viewModel.product.colors)
-              InkWell(
-                  child: Container(
-                    width: 22,
-                    height: 22,
-                    decoration: BoxDecoration(
-                        color: Color(
-                            int.parse(color.code, radix: 16) + 0xFF000000),
-                        shape: BoxShape.rectangle,
-                        borderRadius: BorderRadius.circular(1),
-                        border: Border.all(
-                          color: Colors.grey,
-                          width: 1,
-                        )), // 角半徑
-                  ).addPadding(right: 10),
-                  onTap: () {
-                    viewModel.setColor(color);
-                  })
-          ],
-        );
-      },
+    return Row(
+      children: [
+        const CustomText(text: "顏色"),
+        const VerticalLineView().addHorizontalPadding(10),
+        for (ProductColor color in data.product.colors)
+          InkWell(
+              child: Container(
+                width: 22,
+                height: 22,
+                decoration: BoxDecoration(
+                    color: Color(int.parse(color.code, radix: 16) + 0xFF000000),
+                    shape: BoxShape.rectangle,
+                    borderRadius: BorderRadius.circular(1),
+                    border: (color.code == data.color)
+                        ? Border.all(color: Colors.black, width: 3)
+                        : Border.all(color: Colors.grey, width: 1)), // 角半徑
+              ).addPadding(right: 10),
+              onTap: () {
+                context.read<StockCubit>().setColor(color.code);
+              })
+      ],
     );
   }
 }
 
 class SizeView extends StatelessWidget {
-  const SizeView({super.key, required this.viewModel});
+  const SizeView({super.key, required this.context, required this.data});
 
-  final DetailViewModel viewModel;
+  final BuildContext context;
+  final StockData data;
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder(
-        valueListenable: viewModel.currentSize,
-        builder: (BuildContext context, value, Widget? child) {
-          return Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              const CustomText(text: "尺寸"),
-              const VerticalLineView().addHorizontalPadding(10),
-              for (String size in viewModel.product.sizes)
-                ElevatedButton(
-                  style: TextButton.styleFrom(
-                      backgroundColor: (size == viewModel.currentSize.value)
-                          ? Colors.white70
-                          : Colors.black54,
-                      foregroundColor: (size == viewModel.currentSize.value)
-                          ? Colors.black
-                          : Colors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20.0),
-                      ),
-                      textStyle: const TextStyle(fontSize: 14)),
-                  child: Text(size),
-                  onPressed: () {
-                    viewModel.setSize(size);
-                  },
-                ).addPadding(right: 8)
-            ],
-          );
-        });
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        const CustomText(text: "尺寸"),
+        const VerticalLineView().addHorizontalPadding(10),
+        for (String size in data.product.sizes)
+          ElevatedButton(
+            style: TextButton.styleFrom(
+                backgroundColor:
+                    (size == data.size) ? Colors.white70 : Colors.black54,
+                foregroundColor:
+                    (size == data.size) ? Colors.black : Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20.0),
+                ),
+                textStyle: const TextStyle(fontSize: 14)),
+            child: Text(size),
+            onPressed: () {
+              context.read<StockCubit>().setSize(size);
+            },
+          ).addPadding(right: 8)
+      ],
+    );
   }
 }
 
 class StockView extends StatelessWidget {
-  const StockView({super.key, required this.viewModel});
+  const StockView({super.key, required this.context, required this.data});
 
-  final DetailViewModel viewModel;
+  final BuildContext context;
+  final StockData data;
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder(
-        valueListenable: viewModel.currentQuantity,
-        builder: (BuildContext context, value, Widget? child) {
-          bool couldReduce = viewModel.currentQuantity.value > 0;
-          bool couldAdd =
-              viewModel.currentQuantity.value < viewModel.currentStock.value;
+    bool couldReduce = data.quantity > 0;
+    bool couldAdd = data.quantity < data.stock;
 
-          print(
-              "currentQuantity=${viewModel.currentQuantity.value}, Stock=${viewModel.currentStock}");
-          return Row(
-            children: [
-              const CustomText(text: "數量"),
-              const VerticalLineView().addHorizontalPadding(10),
-              IconButton(
-                      icon: const Icon(Icons.remove_circle),
-                      disabledColor: Colors.grey,
-                      onPressed: couldReduce
-                          ? () {
-                              viewModel.changeQuantity(-1);
-                            }
-                          : null)
-                  .wrapByExpanded(),
-              Text(viewModel.currentQuantity.value.toString(),
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(fontSize: 16))
-                  .wrapByExpanded(flex: 3),
-              IconButton(
-                      icon: const Icon(Icons.add_circle),
-                      disabledColor: Colors.grey,
-                      onPressed: couldAdd
-                          ? () {
-                              viewModel.changeQuantity(1);
-                            }
-                          : null)
-                  .wrapByExpanded()
-            ],
-          );
-        });
+    return Row(
+      children: [
+        const CustomText(text: "數量"),
+        const VerticalLineView().addHorizontalPadding(10),
+        IconButton(
+                icon: const Icon(Icons.remove_circle),
+                disabledColor: Colors.grey,
+                onPressed: couldReduce
+                    ? () {
+                        context.read<StockCubit>().decrement();
+                      }
+                    : null)
+            .expanded(),
+        Text(data.quantity.toString(),
+                textAlign: TextAlign.center,
+                style: const TextStyle(fontSize: 16))
+            .expanded(flex: 3),
+        IconButton(
+                icon: const Icon(Icons.add_circle),
+                disabledColor: Colors.grey,
+                onPressed: couldAdd
+                    ? () {
+                        context.read<StockCubit>().increment();
+                      }
+                    : null)
+            .expanded()
+      ],
+    );
+  }
+}
+
+class ConfirmBtnView extends StatelessWidget {
+  const ConfirmBtnView({super.key, required this.context, required this.data});
+
+  final BuildContext context;
+  final StockData data;
+
+  @override
+  Widget build(BuildContext context) {
+    bool dataValid =
+        data.color != "Default" && data.size != "Default" && data.quantity != 0;
+
+    return Row(
+      children: [
+        TextButton(
+          style: TextButton.styleFrom(
+              backgroundColor: dataValid ? Colors.black87 : Colors.grey,
+              foregroundColor: Colors.white,
+              textStyle: const TextStyle(fontSize: 20)),
+          onPressed: () {},
+          child: Text(getText()).addVerticalPadding(12),
+        ).expanded()
+      ],
+    );
+  }
+
+  String getText() {
+    List<String> list = [];
+    if (data.color == "Default") list.add("顏色");
+    if (data.size == "Default") list.add("尺寸");
+    if (data.quantity == 0 && data.stock != 0) list.add("數量");
+
+    if (list.isEmpty) {
+      return (data.stock != 0) ? "加入購物車" : "已售完";
+    } else {
+      return "請選擇${list.join('、')}";
+    }
   }
 }
 
@@ -304,9 +309,9 @@ class CustomText extends StatelessWidget {
 }
 
 class StoryView extends StatelessWidget {
-  const StoryView({super.key, required this.viewModel});
+  const StoryView({super.key, required this.product});
 
-  final DetailViewModel viewModel;
+  final Product product;
 
   @override
   Widget build(BuildContext context) {
@@ -316,11 +321,11 @@ class StoryView extends StatelessWidget {
           children: [
             const GradientColorText(text: "細部說明"),
             const SizedBox(width: 15),
-            const Divider(color: Colors.black, thickness: 1).wrapByExpanded()
+            const Divider(color: Colors.black, thickness: 1).expanded()
           ],
         ).addPadding(top: 20, bottom: 5),
-        Text(viewModel.product.story),
-        for (String image in viewModel.product.images)
+        Text(product.story),
+        for (String image in product.images)
           CachedNetworkImage(imageUrl: image).addPadding(top: 16)
       ],
     );

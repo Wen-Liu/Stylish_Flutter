@@ -95,6 +95,11 @@ class Product {
       sizes: sizesList,
     );
   }
+
+  @override
+  String toString() {
+    return 'Product{id: $id, category: $category, \ncolors: $colors, \nsizes: $sizes, \nvariants: $variants}';
+  }
 }
 
 class ProductColor {
@@ -108,6 +113,11 @@ class ProductColor {
       code: json['code'],
       name: json['name'],
     );
+  }
+
+  @override
+  String toString() {
+    return 'ProductColor{code: $code, name: $name}';
   }
 }
 
@@ -124,6 +134,11 @@ class Variant {
       size: json['size'],
       stock: json['stock'],
     );
+  }
+
+  @override
+  String toString() {
+    return '\nVariant{colorCode: $colorCode, size: $size, stock: $stock} ';
   }
 }
 
