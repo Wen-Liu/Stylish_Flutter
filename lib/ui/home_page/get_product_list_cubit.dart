@@ -1,6 +1,6 @@
 import 'package:bloc/bloc.dart';
 import 'package:meta/meta.dart';
-import '../../data_class/get_product_response.dart';
+import '../../data_class/get_all_product_response.dart';
 import '../../network/ProductRepository.dart';
 
 part '../../network/api_state.dart';
@@ -15,7 +15,7 @@ class GetProductListCubit extends Cubit<ApiState> {
   Future<void> getProductList() async {
     try {
       emit(Loading());
-      final productList = await productRepository.getProductData();
+      final productList = await productRepository.getAllProductData();
       emit(ApiSuccess<List<Product>>(productList));
     } catch (e) {
       emit(ApiError(e.toString()));

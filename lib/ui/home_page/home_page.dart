@@ -5,7 +5,7 @@ import 'package:stylish/extensions.dart';
 import 'package:stylish/ui/detail_page/detail_page.dart';
 import 'package:stylish/ui/home_page/get_campaign_cubit.dart';
 import 'package:stylish/ui/home_page/get_product_list_cubit.dart';
-import '../../data_class/get_product_response.dart';
+import '../../data_class/get_all_product_response.dart';
 import '../../network/ProductRepository.dart';
 import '../stylish_app_bar.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -39,7 +39,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     } else if (state is ApiError) {
                       return Text(state.errorCode).addAllPadding(20).atCenter();
                     } else {
-                      return const Text("default").atCenter();
+                      return const Text("Retry").atCenter();
                     }
                   },
                 ),
@@ -61,7 +61,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 } else if (state is ApiError) {
                   return Text(state.errorCode).addAllPadding(20).atCenter();
                 } else {
-                  return const Text("default").atCenter();
+                  return const Text("Retry").atCenter();
                 }
               }),
             ).expanded()
@@ -196,7 +196,9 @@ class ItemView extends StatelessWidget {
       onTap: () {
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => DetailPage(product: product)),
+          MaterialPageRoute(
+              builder: (context) =>
+                  DetailPage(id: product.id, product: product)),
         );
       },
       child: Card(

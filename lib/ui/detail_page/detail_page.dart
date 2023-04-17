@@ -1,19 +1,22 @@
+import 'package:auto_route/annotations.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:provider/provider.dart';
-import 'package:stylish/data_class/get_product_response.dart';
+import 'package:stylish/data_class/get_all_product_response.dart';
 import 'package:stylish/extensions.dart';
 import 'package:stylish/ui/detail_page/detail_view_model.dart';
-import 'package:stylish/ui/detail_page/stock_cubit.dart';
+import 'package:stylish/ui/home_page/get_product_list_cubit.dart';
 import 'package:stylish/ui/stylish_app_bar.dart';
 
+import '../../network/ProductRepository.dart';
+
+@RoutePage()
 class DetailPage extends StatelessWidget {
-  DetailPage({super.key, required this.product});
+  DetailPage({super.key, required this.id, this.product});
 
-  final Product product;
-
-  // final Product product = DetailViewModel();
+  final ProductRepository repo = ProductRepository();
+  final Product? product;
+  final int id;
 
   static const double webViewWidth = 760;
   static const double appViewWidth = 360;
@@ -23,12 +26,28 @@ class DetailPage extends StatelessWidget {
     return Scaffold(
         appBar: const StylishAppBar(),
         body: SingleChildScrollView(
-          child: LayoutBuilder(builder: (context, constraints) {
-            return ((constraints.maxWidth > 780)
-                    ? WebPageView(product: product, width: webViewWidth)
-                    : AppPageView(product: product, width: appViewWidth))
-                .addVerticalPadding(10);
-          }),
+          child: BlocProvider(
+            create: (context) => DetailCubit(repo: repo, id: id, product: product),
+            child: BlocBuilder<DetailCubit, ApiState>(
+              builder: (context, state) {
+                if (state is Loading) {
+                  return const Text("Loading").atCenter();
+                } else if (state is ApiSuccess) {
+                  return LayoutBuilder(builder: (context, constraints) {
+                    return ((constraints.maxWidth > webViewWidth + 20)
+                        ? WebPageView(product: state.data, width: webViewWidth)
+                        : AppPageView(product: state.data, width: appViewWidth))
+                        .atCenter().addVerticalPadding(10);
+                  });
+                } else if (state is ApiError) {
+                  return Text(state.errorCode).addAllPadding(20).atCenter();
+                } else {
+                  return const Text("Retry").atCenter();
+                }
+
+              },
+            ),
+          ),
         ));
   }
 }
@@ -52,7 +71,7 @@ class WebPageView extends StatelessWidget {
         ),
         StoryView(product: product)
       ],
-    ).atCenter().wrapByContainer(width: 760);
+    ).wrapByContainer(width: 760);
   }
 }
 
@@ -70,7 +89,7 @@ class AppPageView extends StatelessWidget {
         SelectView(product: product).addPadding(top: 10),
         StoryView(product: product)
       ],
-    ).wrapByContainer(width: 360).atCenter();
+    ).wrapByContainer(width: width);
   }
 }
 
@@ -85,8 +104,8 @@ class SelectView extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(product.title,
-                style:
-                    const TextStyle(fontSize: 20, fontWeight: FontWeight.bold))
+            style:
+            const TextStyle(fontSize: 20, fontWeight: FontWeight.bold))
             .addPadding(top: 5),
         CustomText(text: product.id.toString(), fontSize: 14)
             .addPadding(top: 3),
@@ -182,9 +201,9 @@ class SizeView extends StatelessWidget {
           ElevatedButton(
             style: TextButton.styleFrom(
                 backgroundColor:
-                    (size == data.size) ? Colors.white70 : Colors.black54,
+                (size == data.size) ? Colors.white70 : Colors.black54,
                 foregroundColor:
-                    (size == data.size) ? Colors.black : Colors.white,
+                (size == data.size) ? Colors.black : Colors.white,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(20.0),
                 ),
@@ -215,26 +234,26 @@ class StockView extends StatelessWidget {
         const CustomText(text: "數量"),
         const VerticalLineView().addHorizontalPadding(10),
         IconButton(
-                icon: const Icon(Icons.remove_circle),
-                disabledColor: Colors.grey,
-                onPressed: couldReduce
-                    ? () {
-                        context.read<StockCubit>().decrement();
-                      }
-                    : null)
+            icon: const Icon(Icons.remove_circle),
+            disabledColor: Colors.grey,
+            onPressed: couldReduce
+                ? () {
+              context.read<StockCubit>().decrement();
+            }
+                : null)
             .expanded(),
         Text(data.quantity.toString(),
-                textAlign: TextAlign.center,
-                style: const TextStyle(fontSize: 16))
+            textAlign: TextAlign.center,
+            style: const TextStyle(fontSize: 16))
             .expanded(flex: 3),
         IconButton(
-                icon: const Icon(Icons.add_circle),
-                disabledColor: Colors.grey,
-                onPressed: couldAdd
-                    ? () {
-                        context.read<StockCubit>().increment();
-                      }
-                    : null)
+            icon: const Icon(Icons.add_circle),
+            disabledColor: Colors.grey,
+            onPressed: couldAdd
+                ? () {
+              context.read<StockCubit>().increment();
+            }
+                : null)
             .expanded()
       ],
     );

@@ -28,6 +28,11 @@ class ApiService {
         endpoint: _productAll, parameters: {"paging": page});
   }
 
+  Future<Response> getSingleProduct(int id) async {
+    return await callGetApiResponse(
+        endpoint: _productDetails, parameters: {"id": id});
+  }
+
   Future<Response> getHotData() async {
     return await callGetApiResponse(endpoint: _marketingHots);
   }

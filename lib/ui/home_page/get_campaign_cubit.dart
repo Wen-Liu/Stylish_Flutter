@@ -1,6 +1,6 @@
 import 'package:bloc/bloc.dart';
 import 'package:stylish/data_class/get_campaign_response.dart';
-import 'package:stylish/data_class/get_product_response.dart';
+import 'package:stylish/data_class/get_all_product_response.dart';
 import 'package:stylish/ui/home_page/get_product_list_cubit.dart';
 
 import '../../network/ProductRepository.dart';

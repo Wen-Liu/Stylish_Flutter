@@ -1,4 +1,4 @@
-import 'package:stylish/data_class/get_product_response.dart';
+import 'package:stylish/data_class/get_all_product_response.dart';
 
 class HotResponse {
   final List<Product> data;

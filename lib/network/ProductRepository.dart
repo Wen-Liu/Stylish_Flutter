@@ -1,23 +1,26 @@
 import 'package:stylish/data_class/get_campaign_response.dart';
 import 'package:stylish/network/api_service.dart';
 
-import '../data_class/get_product_response.dart';
+import '../data_class/get_all_product_response.dart';
+import '../data_class/get_single_product_response.dart';
 
 class ProductRepository {
-  ProductRepository({
-    ApiService? apiService,
-  }) : _apiService = apiService ?? ApiService();
+  static final ProductRepository _repo = ProductRepository._internal();
 
-  final ApiService _apiService;
+  final ApiService _apiService = ApiService();
 
-  Future<List<Product>> getProductData() async {
+  factory ProductRepository() => _repo;
+
+  ProductRepository._internal();
+
+  Future<List<Product>> getAllProductData() async {
     List<Product> list = [];
     int? page = 0;
 
     while (page != null) {
       final response = await _apiService.getAllProduct(page.toString());
       if (response.statusCode == 200) {
-        final responseData = ProductResponse.fromJson(response.data);
+        final responseData = AllProductResponse.fromJson(response.data);
         list.addAll(responseData.data);
         page = responseData.nextPage;
       } else {
@@ -28,11 +31,22 @@ class ProductRepository {
     return list;
   }
 
+  Future<Product> getSingleProductData(int id) async {
+    final response = await _apiService.getSingleProduct(id);
+    print("getSingleProductData= $response");
+    if (response.statusCode == 200) {
+      final responseData = SingleProductResponse.fromJson(response.data).data;
+      return responseData;
+    } else {
+      throw Exception(response.statusCode);
+    }
+  }
+
   Future<List<Product>> getHotData() async {
     final response = await _apiService.getHotData();
     print("getHotData= $response");
     if (response.statusCode == 200) {
-      final responseData = ProductResponse.fromJson(response.data);
+      final responseData = AllProductResponse.fromJson(response.data);
       return responseData.data;
     } else {
       throw Exception(response.statusCode);
