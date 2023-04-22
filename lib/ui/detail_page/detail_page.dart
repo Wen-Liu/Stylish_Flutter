@@ -8,7 +8,7 @@ import 'package:stylish/ui/detail_page/detail_view_model.dart';
 import 'package:stylish/ui/home_page/get_product_list_cubit.dart';
 import 'package:stylish/ui/stylish_app_bar.dart';
 
-import '../../network/ProductRepository.dart';
+import '../../network/product_repository.dart';
 
 @RoutePage()
 class DetailPage extends StatelessWidget {
@@ -31,7 +31,7 @@ class DetailPage extends StatelessWidget {
             child: BlocBuilder<DetailCubit, ApiState>(
               builder: (context, state) {
                 if (state is Loading) {
-                  return const Text("Loading").atCenter();
+                  return const Text("Loading").addAllPadding(20).atCenter();
                 } else if (state is ApiSuccess) {
                   return LayoutBuilder(builder: (context, constraints) {
                     return ((constraints.maxWidth > webViewWidth + 20)

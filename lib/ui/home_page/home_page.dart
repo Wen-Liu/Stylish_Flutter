@@ -5,8 +5,9 @@ import 'package:stylish/extensions.dart';
 import 'package:stylish/ui/detail_page/detail_page.dart';
 import 'package:stylish/ui/home_page/get_campaign_cubit.dart';
 import 'package:stylish/ui/home_page/get_product_list_cubit.dart';
+import 'package:stylish/ui/tap_pay_page/tap_pay_page.dart';
 import '../../data_class/get_all_product_response.dart';
-import '../../network/ProductRepository.dart';
+import '../../network/product_repository.dart';
 import '../stylish_app_bar.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
@@ -105,17 +106,28 @@ class BannerView extends StatelessWidget {
         padding: const EdgeInsets.all(10),
         itemCount: bannerList.length,
         itemBuilder: (BuildContext context, int index) {
-          return Card(
-              clipBehavior: Clip.antiAlias,
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10)),
-              child: CachedNetworkImage(
-                imageUrl: bannerList[index].picture,
-                fit: BoxFit.fitHeight,
-                placeholder: (context, url) =>
-                    const CircularProgressIndicator().addAllPadding(20),
-                errorWidget: (context, url, error) => const Icon(Icons.error),
-              ));
+          return GestureDetector(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const TapPayPage()),
+              );
+            },
+            child: Card(
+                clipBehavior: Clip.antiAlias,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10)),
+                child: CachedNetworkImage(
+                  imageUrl: bannerList[index].picture,
+                  fit: BoxFit.fitHeight,
+                  placeholder: (context, url) => const SizedBox(
+                          height: 20,
+                          width: 20,
+                          child: CircularProgressIndicator())
+                      .atCenter(),
+                  errorWidget: (context, url, error) => const Icon(Icons.error),
+                )),
+          );
         });
   }
 }
@@ -215,8 +227,9 @@ class ItemView extends StatelessWidget {
               width: 80,
               fit: BoxFit.contain,
               imageUrl: product.mainImage,
-              placeholder: (context, url) =>
-                  const CircularProgressIndicator().addAllPadding(20),
+              placeholder: (context, url) => const SizedBox(
+                      height: 20, width: 20, child: CircularProgressIndicator())
+                  .atCenter(),
               errorWidget: (context, url, error) => const Icon(Icons.error),
             ),
             Column(

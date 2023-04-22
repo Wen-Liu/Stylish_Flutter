@@ -3,7 +3,7 @@ import 'package:stylish/data_class/get_all_product_response.dart';
 import 'package:stylish/extensions.dart';
 import 'package:stylish/ui/home_page/get_product_list_cubit.dart';
 
-import '../../network/ProductRepository.dart';
+import '../../network/product_repository.dart';
 
 class StockCubit extends Cubit<StockData> {
   StockCubit(Product product) : super(StockData(product: product)) {

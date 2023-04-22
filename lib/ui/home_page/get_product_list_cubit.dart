@@ -1,7 +1,7 @@
 import 'package:bloc/bloc.dart';
 import 'package:meta/meta.dart';
 import '../../data_class/get_all_product_response.dart';
-import '../../network/ProductRepository.dart';
+import '../../network/product_repository.dart';
 
 part '../../network/api_state.dart';
 
