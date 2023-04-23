@@ -34,6 +34,17 @@ android {
         targetCompatibility 11
     }
 
+    dependenciesInfo {
+        // Disables dependency metadata when building APKs.
+        includeInApk = false
+        // Disables dependency metadata when building Android App Bundles.
+        includeInBundle = false
+    }
+
+    lintOptions {
+        disable 'InvalidPackage'
+    }
+
     kotlinOptions {
         jvmTarget = '1.8'
     }
@@ -47,7 +58,7 @@ android {
         applicationId "com.example.stylish"
         // You can update the following values to match your application needs.
         // For more information, see: https://docs.flutter.dev/deployment/android#reviewing-the-gradle-build-configuration.
-        minSdkVersion flutter.minSdkVersion
+        minSdkVersion 25
         targetSdkVersion flutter.targetSdkVersion
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
@@ -55,9 +66,8 @@ android {
 
     buildTypes {
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
-            signingConfig signingConfigs.debug
+//            minifyEnabled false
+//            signingConfig signingConfigs.debug
         }
     }
 }
@@ -67,5 +77,7 @@ flutter {
 }
 
 dependencies {
+//    implementation fileTree(include:['*.aar'], dir:'libs')
+    implementation(name:'tpdirect', ext:'aar')
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 }

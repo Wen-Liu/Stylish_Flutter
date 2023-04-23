@@ -1,4 +1,3 @@
-import 'package:auto_route/annotations.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -10,7 +9,6 @@ import 'package:stylish/ui/stylish_app_bar.dart';
 
 import '../../network/product_repository.dart';
 
-@RoutePage()
 class DetailPage extends StatelessWidget {
   DetailPage({super.key, required this.id, this.product});
 
