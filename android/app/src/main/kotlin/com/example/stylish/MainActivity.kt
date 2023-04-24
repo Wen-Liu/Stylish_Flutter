@@ -1,6 +1,8 @@
 package com.example.stylish
 
+import android.app.Activity
 import android.content.Context
+import android.content.Intent
 import android.os.BatteryManager
 import android.util.Log
 import androidx.annotation.NonNull
@@ -9,25 +11,26 @@ import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.plugin.common.MethodChannel
 import tech.cherri.tpdirect.api.*
+import com.google.android.gms.common.api.Status
+import com.google.android.gms.wallet.AutoResolveHelper
+import com.google.android.gms.wallet.PaymentData
+import com.google.android.gms.wallet.TransactionInfo
+import com.google.android.gms.wallet.WalletConstants
+
+private var paymentData: PaymentData? = null
 
 class MainActivity : FlutterActivity(), FlutterPlugin {
     private val CHANNEL = "Android_channel"
     private val TAG = "MainActivity"
+
     //    lateinit var plugin: TappayflutterpluginPlugin
     private var LOAD_PAYMENT_DATA_REQUEST_CODE = 102
+    private val tpdGooglePayListenerInterfaceInterface: TPDGooglePayListenerInterface =
+        TPDGooglePayListenerInterface()
     private val tpdMerchant = TPDMerchant()
     private val tpdConsumer = TPDConsumer()
+    private var tpdGooglePay: TPDGooglePay? = null
 
-//    override fun onAttachedToEngine(@NonNull flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
-//        val channel = MethodChannel(flutterPluginBinding.binaryMessenger, "tappayflutterplugin")
-//        plugin = TappayflutterpluginPlugin(flutterPluginBinding.applicationContext)
-//        channel.setMethodCallHandler(plugin)
-//    }
-//
-//    override fun onAttachedToActivity(binding: ActivityPluginBinding) {
-//        binding.addActivityResultListener(this)
-//        plugin.activity = binding.activity
-//    }
 
     override fun configureFlutterEngine(@NonNull flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
@@ -88,8 +91,8 @@ class MainActivity : FlutterActivity(), FlutterPlugin {
                         Pair(5, TPDCard.CardType.UnionPay)
                     )
 
-                    val networks: List<Int>? = call.argument("allowedNetworks")
-                    for (i in networks!!) {
+//                    val networks: List<Int>? = call.argument("allowedNetworks")
+                    for (i in 0..5) {
                         val type = cardTypeMap[i]
                         type?.let { allowedNetworks.add(it) }
                     }
@@ -120,6 +123,12 @@ class MainActivity : FlutterActivity(), FlutterPlugin {
                         isShippingAddressRequired,
                         isEmailRequired
                     )
+                }
+
+                in "requestPaymentData" -> {
+                    val totalPrice: String? = call.argument("totalPrice")
+                    val currencyCode: String? = call.argument("currencyCode")
+                    requestPaymentData(totalPrice, currencyCode)
                 }
 
                 "getBatteryLevel" -> {
@@ -260,7 +269,45 @@ class MainActivity : FlutterActivity(), FlutterPlugin {
         if (isEmailRequired != null) {
             tpdConsumer.isEmailRequired = isEmailRequired
         }
+        tpdGooglePay = TPDGooglePay(this.activity, tpdMerchant, tpdConsumer)
+        tpdGooglePay!!.isGooglePayAvailable(this.tpdGooglePayListenerInterfaceInterface)
     }
+
+    //request payment data
+    private fun requestPaymentData(totalPrice: String?, currencyCode: String?) {
+        tpdGooglePay?.requestPayment(
+            TransactionInfo.newBuilder()
+                .setTotalPriceStatus(WalletConstants.TOTAL_PRICE_STATUS_FINAL)
+                .setTotalPrice(totalPrice!!)
+                .setCurrencyCode(currencyCode!!)
+                .build(), LOAD_PAYMENT_DATA_REQUEST_CODE
+        );
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        when (requestCode) {
+            LOAD_PAYMENT_DATA_REQUEST_CODE -> when (resultCode) {
+                Activity.RESULT_OK -> {
+                    if (data != null) {
+                        paymentData = PaymentData.getFromIntent(data)
+                    }
+                }
+                Activity.RESULT_CANCELED -> {
+                    Log.d("RESULT_CANCELED", data.toString())
+                }
+                AutoResolveHelper.RESULT_ERROR -> {
+                    val status: Status? = AutoResolveHelper.getStatusFromIntent(data)
+                    if (status != null) {
+                        Log.d(
+                            "RESULT_ERROR",
+                            "AutoResolveHelper.RESULT_ERROR : " + status.statusCode.toString() + " , message = " + status.statusMessage
+                        )
+                    }
+                }
+            }
+        }
+    }
+
 
     override fun onAttachedToEngine(binding: FlutterPlugin.FlutterPluginBinding) {
     }

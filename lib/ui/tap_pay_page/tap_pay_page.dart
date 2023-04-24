@@ -19,7 +19,7 @@ class _TapPayPageState extends State<TapPayPage> {
   String _batteryLevel = 'Unknown battery level.';
   bool _isInitSuccess = false;
   bool _isCardValidate = false;
-  String _prime = "";
+  String _prime = "default";
 
   @override
   Widget build(BuildContext context) {
@@ -44,7 +44,7 @@ class _TapPayPageState extends State<TapPayPage> {
           Column(
             children: [
               ElevatedButton(
-                child: const Text("init tappay"),
+                child: const Text("Init tappay"),
                 onPressed: () async {
                   bool isSuccess = await AndroidRepository().initTapPay();
                   setState(() {
@@ -52,9 +52,9 @@ class _TapPayPageState extends State<TapPayPage> {
                   });
                 },
               ).addPadding(top: 20),
-              Text("init TapPay Success: $_isInitSuccess"),
+              Text("Init TapPay Success: $_isInitSuccess"),
               ElevatedButton(
-                child: const Text("Validate"),
+                child: const Text("Validate Card"),
                 onPressed: () async {
                   bool isSuccess =
                       await AndroidRepository().validate(CardInfo());
@@ -65,7 +65,7 @@ class _TapPayPageState extends State<TapPayPage> {
               ).addPadding(top: 20),
               Text("Validate Card Success: $_isCardValidate"),
               ElevatedButton(
-                child: const Text("get getPrime"),
+                child: const Text("Get Prime"),
                 onPressed: () async {
                   String prime = await AndroidRepository().getPrime(CardInfo());
                   setState(() {
@@ -73,7 +73,7 @@ class _TapPayPageState extends State<TapPayPage> {
                   });
                 },
               ).addPadding(top: 20),
-              Text("get Prime: $_prime").addHorizontalPadding(30),
+              Text("Result: $_prime").addHorizontalPadding(30),
             ],
           ).atCenter().expanded()
         ]));
