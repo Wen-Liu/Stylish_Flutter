@@ -5,6 +5,7 @@ import 'package:stylish/extensions.dart';
 import 'package:stylish/ui/detail_page/detail_page.dart';
 import 'package:stylish/ui/home_page/get_campaign_cubit.dart';
 import 'package:stylish/ui/home_page/get_product_list_cubit.dart';
+import 'package:stylish/ui/map_page/google_map_page.dart';
 import 'package:stylish/ui/tap_pay_page/tap_pay_page.dart';
 import '../../data_class/get_all_product_response.dart';
 import '../../network/product_repository.dart';
@@ -110,7 +111,13 @@ class BannerView extends StatelessWidget {
             onTap: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => const TapPayPage()),
+                MaterialPageRoute(builder: (context) {
+                  if (index == 0) {
+                    return const TapPayPage();
+                  } else {
+                    return const GoogleMapPage();
+                  }
+                }),
               );
             },
             child: Card(

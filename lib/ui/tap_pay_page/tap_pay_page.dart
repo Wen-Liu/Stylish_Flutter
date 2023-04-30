@@ -1,12 +1,8 @@
 import 'package:flutter/material.dart';
-import 'dart:async';
-import 'package:flutter/services.dart';
 import 'package:stylish/android_repository.dart';
 import 'package:stylish/data_class/card_info.dart';
 import 'package:stylish/extensions.dart';
-import 'package:stylish/network/product_repository.dart';
 import 'package:stylish/ui/stylish_app_bar.dart';
-// import 'package:flutter_tappay/flutter_tappay.dart';
 
 class TapPayPage extends StatefulWidget {
   const TapPayPage({super.key});
