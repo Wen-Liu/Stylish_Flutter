@@ -113,9 +113,9 @@ class BannerView extends StatelessWidget {
                 context,
                 MaterialPageRoute(builder: (context) {
                   if (index == 0) {
-                    return const TapPayPage();
-                  } else {
                     return const GoogleMapPage();
+                  } else {
+                    return const TapPayPage();
                   }
                 }),
               );
