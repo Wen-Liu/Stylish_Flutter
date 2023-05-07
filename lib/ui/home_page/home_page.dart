@@ -7,6 +7,7 @@ import 'package:stylish/ui/home_page/get_campaign_cubit.dart';
 import 'package:stylish/ui/home_page/get_product_list_cubit.dart';
 import 'package:stylish/ui/map_page/google_map_page.dart';
 import 'package:stylish/ui/tap_pay_page/tap_pay_page.dart';
+import 'package:stylish/ui/web_rtc_page/web_rtc_page.dart';
 import '../../data_class/get_all_product_response.dart';
 import '../../network/product_repository.dart';
 import '../stylish_app_bar.dart';
@@ -112,10 +113,13 @@ class BannerView extends StatelessWidget {
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) {
-                  if (index == 0) {
-                    return const GoogleMapPage();
-                  } else {
-                    return const TapPayPage();
+                  switch (index) {
+                    case 0:
+                      return const WebRtcPage();
+                    case 1:
+                      return const GoogleMapPage();
+                    default:
+                      return const TapPayPage();
                   }
                 }),
               );
