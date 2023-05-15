@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:stylish/data_class/get_campaign_response.dart';
 import 'package:stylish/extensions.dart';
+import 'package:stylish/ui/ar_page/ar_page.dart';
+import 'package:stylish/ui/ar_page/ar_page_II.dart';
 import 'package:stylish/ui/detail_page/detail_page.dart';
 import 'package:stylish/ui/home_page/get_campaign_cubit.dart';
 import 'package:stylish/ui/home_page/get_product_list_cubit.dart';
@@ -115,8 +117,10 @@ class BannerView extends StatelessWidget {
                 MaterialPageRoute(builder: (context) {
                   switch (index) {
                     case 0:
-                      return const WebRtcPage();
+                      return const ArPage2();
                     case 1:
+                      return const WebRtcPage();
+                    case 2:
                       return const GoogleMapPage();
                     default:
                       return const TapPayPage();
